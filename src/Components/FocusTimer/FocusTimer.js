@@ -5,21 +5,37 @@ import { useState } from 'react';
 
 const FocusTimer = () =>{
     const [time , setTime] = useState(15);
-    const timeInMiliSeconds = time * 60 * 1000;
-    let timeElapsed = 0;
-    const calculate = ()=>{
-        const timeLeft = timeInMiliSeconds - timeElapsed;
-        setInterval(()=>{
-            timeElapsed = timeElapsed + 1;
-        })
-        timeLeft === 0? console.log('Time is up') : console.log(timeLeft);
-    }
-    calculate()
+    const [minutesLeft , setMinutes] = useState('00')
+    const [secondsLeft , setSeconds] = useState('00')
+    const [timerState , setTimerState] = useState(false)
+    const timeInMiliSeconds =  time * 60000;
+    
+    let timeToCountDownTo = new Date().getTime() + timeInMiliSeconds;
+    
 
+
+    const calculate = ()=> { 
+        setInterval( ()=>{
+        let now = new Date().getTime()
+        let timeElapsed = timeToCountDownTo - now
+        if (timeElapsed < 0 || timeElapsed === 0){
+            console.log('Time is up!')
+            clearInterval(calculate)
+        }
+        if(timeElapsed > 0){
+            timeElapsed = timeToCountDownTo - now
+            setMinutes(Math.floor(timeElapsed / 60000))
+            setSeconds(Math.floor((timeElapsed % 60000)  / 1000))
+
+        }
+        } , 1000)
+    
+    }
 
     return(
         <div className='FocusTimerCard'>
-           <div className='TimerParams'>
+           <div className={ timerState === false? 
+           'TimerParams' : 'TimerParams disabled'}>
            <h1>Ready, set, focus!</h1>
             <p>Achieve your goals and get more done with focus sessions.Tell us how much time you have and we'll set up the rest.</p>
             <div className='FocusTimer'>
@@ -42,16 +58,33 @@ const FocusTimer = () =>{
                    
                     </div>
             </div>
-            <div className='FocusTimerButton'>
+            <div onClick={()=> {
+                calculate()
+                setTimerState(true)
+
+
+            }} className='FocusTimerButton'>
                 Start Focus session
             </div>
            </div>
-           <div className='FocusTimerActive'>
+           <div className={ timerState === false? 
+           'FocusTimerActive disabled' : 'FocusTimerActive'}>
                 <div  id='Progress' className='Progress'>
                     <div className='Timer'>
-                     
+                      <h1>{`${minutesLeft} : ${secondsLeft}`}</h1>
                     </div>
+                    
                 </div>
+                <div onClick={()=> {
+                setMinutes(()=>'00')
+                setSeconds(()=>'00')
+                setTime(()=>15)
+                setTimerState(()=>false)
+
+
+            }} className='FocusTimerButton'>
+                Stop Focus session
+            </div>
            </div>
         </div>
         
